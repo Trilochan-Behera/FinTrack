@@ -9,12 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@material-tailwind/react": "^2.1.10",
     "@react-jvectormap/core": "^1.0.4",
     "@react-jvectormap/unitedstates": "^1.0.1",
     "@types/node": "20.10.0",
     "@types/react": "18.2.38",
     "@types/react-dom": "18.2.17",
-    "apexcharts": "^3.41.1",
+    "apexcharts": "^3.54.1",
     "autoprefixer": "10.4.16",
     "axios": "^1.6.2",
     "eslint": "8.54.0",

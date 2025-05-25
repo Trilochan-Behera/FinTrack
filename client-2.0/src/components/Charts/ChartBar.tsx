@@ -151,12 +151,12 @@ const ChartBar: React.FC<ChartBarStatsProps> = ({
 
 
   return (
-    <div className="col-span-12 rounded-sm border border-stroke bg-white p-8 h-full shadow-default dark:border-strokedark dark:bg-boxdark">
+    <div>
       <div className="mb-4 justify-between gap-4 flex items-center">
         <h4 className="text-lg sm:text-xl font-semibold text-black dark:text-white">
           {title}
         </h4>
-        <div>
+        {/* <div>
           <div className="flex gap-2">
             <div className="text-sm font-semibold text-black dark:text-white">
               <select className="relative md:hidden w-full appearance-none rounded border border-stroke bg-transparent px-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary cursor-pointer" onChange={(e) => setMonth(Number(e?.target?.value))}>
@@ -177,7 +177,7 @@ const ChartBar: React.FC<ChartBarStatsProps> = ({
               </select>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       <div>

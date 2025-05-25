@@ -11,7 +11,7 @@ const CardDataStats: React.FC<CardDataStatsProps> = ({
   const rupee = "₹";
   const { title, total, rate , status} = cardData;
   return (
-    <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+    <div className="rounded border border-stroke bg-white p-4 shadow-default dark:border-strokedark dark:bg-boxdark">
       <div className="flex items-center gap-2">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary bg-opacity-10 dark:bg-meta-3 pl-1">
           {children}

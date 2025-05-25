@@ -43,13 +43,6 @@ const DashboardLayout = React.memo(({ children }: { children: React.ReactNode })
             status:true,
             rate:4
         },
-        {
-            title: "Closing Balance",
-            total: data.income - data.expense - data.savings,
-            icon: TotalSavingSvg,
-            status:false,
-            rate:4
-        }
     ];
 
     const { loading, error, data: response, makeApiCall } = useApiCall();
@@ -102,7 +95,7 @@ const DashboardLayout = React.memo(({ children }: { children: React.ReactNode })
     return (
         <>
             <Breadcrumb pageName={pathname.split("/")[1]} />
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 ">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-5">
                 {
                     cardProps.map((card, i) => (
                         <CardDataStats cardData={card} key={i}>
@@ -111,7 +104,7 @@ const DashboardLayout = React.memo(({ children }: { children: React.ReactNode })
                     ))
                 }
             </div>
-            <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
+            <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:gap-7.5">
                 {children}
             </div>
         </>

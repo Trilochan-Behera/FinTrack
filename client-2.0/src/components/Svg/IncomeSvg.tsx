@@ -3,8 +3,8 @@ import React from "react";
 const IncomeSvg = () => {
   return (
     <svg
-      width={45}
-      height={45}
+      width={35}
+      height={35}
       viewBox="0 0 146 146"
       xmlns="http://www.w3.org/2000/svg"
       fill="#000000"

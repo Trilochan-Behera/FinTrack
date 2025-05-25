@@ -22,7 +22,7 @@ export default function Pagination({ pagination, setPagination, tableData, numbe
                     tableData?.length ?
                         <input
                             type="text"
-                            value={(pagination?.start / numberOfPages) + 1}
+                            value={((pagination?.start / numberOfPages) + 1) || 1}
                             className="w-6 h-6 text-center text-primary font-bold"
                             onChange={(e) => setPagination({ ...pagination, start: (Number(e?.target?.value) * numberOfPages) - numberOfPages, end: (Number(e?.target?.value)) * numberOfPages })}
                         />

@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                             setSidebarOpen={setSidebarOpen}
                         />
                         <main className="overflow-y-auto overflow-x-hidden scrollbar pb-12">
-                        <div className="mx-auto  p-4 md:p-6 2xl:p-10">
+                        <div className="mx-auto  p-4 md:p-6">
                                 {children}
                             </div>
                         </main>
