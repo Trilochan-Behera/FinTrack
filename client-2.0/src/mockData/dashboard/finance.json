@@ -1,0 +1,168 @@
+{
+  "data": [
+    {
+      "title": "expense 1",
+      "date": "01/10/2025",
+      "price": "1000",
+      "category": "food",
+      "type": "expense",
+      "comment": "test comment",
+      "pay_mode": "upi",
+      "user_id": "1234",
+      "created_at": "01/10/2025",
+      "updated_at": "01/10/2025"
+    },
+    {
+      "title": "expense 2",
+      "date": "01/10/2025",
+      "price": "1000",
+      "category": "loan_given",
+      "paid_to": "pintu",
+      "type": "loan",
+      "comment": "test comment",
+      "pay_mode": "upi",
+      "user_id": "1234",
+      "created_at": "01/10/2025",
+      "updated_at": "01/10/2025"
+    },
+    {
+      "title": "expense 3",
+      "date": "01/10/2025",
+      "price": "1000",
+      "category": "stock_buy",
+      "invest_in": "grow",
+      "type": "investment",
+      "comment": "test comment",
+      "user_id": "1234",
+      "created_at": "01/10/2025",
+      "updated_at": "01/10/2025"
+    },
+    {
+      "title": "expense 4",
+      "date": "01/10/2025",
+      "price": 50000,
+      "category": "bike_buy",
+      "installment_amount": 2500,
+      "emi_total_years": 5,
+      "installment_in": "months",
+      "next_payment_date": "01/11/2025",
+      "last_payment_date": "01/10/2025",
+      "total_paid_till": 35000,
+      "total_pay_left": 35000,
+      "total_you_pay": 70000,
+      "total_interst_paid": 20000,
+      "total_emi_left": 12,
+      "type": "emi",
+      "comment": "test comment",
+      "user_id": "1234",
+      "created_at": "01/10/2025",
+      "updated_at": "01/10/2025"
+    },{
+      "title": "expense 5",
+      "purchase_date": "01/10/2025",
+      "price": 499,
+      "category": "netflix",
+      "subscription_amount_renewal_in": "Qauterly",
+      "next_subscription_date": "01/02/2025",
+      "last_subscription_date": "01/10/2025",
+      "total_paid_till": 35000,
+      "active" : true,
+      "type": "subscriptions",
+      "comment": "test comment",
+      "user_id": "1234",
+      "created_at": "01/10/2025",
+      "updated_at": "01/10/2025"
+    },
+    {
+      "title": "income 1",
+      "date": "01/10/2025",
+      "price": "1000",
+      "category": "salary",
+      "type": "income",
+      "comment": "test comment",
+      "user_id": "1234",
+      "created_at": "01/10/2025",
+      "updated_at": "01/10/2025"
+    },
+    {
+      "title": "income 2",
+      "date": "01/10/2025",
+      "price": "1000",
+      "category": "loan_refund",
+      "return_by": "pintu",
+      "return_details": [
+        {
+          "return_date": "01/10/2025",
+          "return_amount": "300"
+        }
+      ],
+      "taken_amount": "500",
+      "return_left": "200",
+      "type": "loan",
+      "comment": "test comment",
+      "user_id": "1234",
+      "created_at": "01/10/2025",
+      "updated_at": "01/10/2025"
+    },
+    {
+      "title": "income 3",
+      "date": "01/10/2025",
+      "price": "1000",
+      "category": "stock sell",
+      "stock_name": "tata motors",
+      "sell_details": [
+        {
+          "sell_quantity": 30,
+          "sell_price": 300,
+          "sell_date": "01/10/2025"
+        }
+      ],
+      "total_stock_quantity": 300,
+      "stock_buy_price": [
+        {
+          "date": "01/10/2025",
+          "price": 1000,
+          "quantity": 100
+        }
+      ],
+      "stocks_left_for_Sell": 70,
+      "invested_amount": 1000,
+      "total_amount_recover": 300,
+      "profit_loss": 0,
+      "type": "investment",
+      "comment": "test comment",
+      "user_id": "1234",
+      "created_at": "01/10/2025",
+      "updated_at": "01/10/2025"
+    },
+    {
+      "title": "income 4",
+      "date": "01/10/2025",
+      "price": "1000",
+      "category": "sip_sell",
+      "selling_amount": 500,
+      "balance_left": 800,
+      "total_balance_till": 1300,
+      "total_profit": 300,
+      "type": "investment",
+      "comment": "test comment",
+      "user_id": "1234",
+      "created_at": "01/10/2025",
+      "updated_at": "01/10/2025"
+    },
+    {
+      "title": "savings 1",
+      "date": "01/10/2025",
+      "price": "1000",
+      "category": "sip",
+      "savings_in": "grow",
+      "autopay": true,
+      "active": true,
+      "type": "savings",
+      "comment": "test comment",
+      "user_id": "1234",
+      "created_at": "01/10/2025",
+      "updated_at": "01/10/2025"
+    }
+  ]
+}
