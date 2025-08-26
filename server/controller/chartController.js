@@ -228,6 +228,8 @@ const getYearlyReport = async (req, res) => {
   let { year } = req.query;
   year = Number(year) || moment().year();
 
+  const currentMonth = moment().month() + 1; // 1–12
+
   // Step 1: Fetch all data for that year grouped by month
   const result = await Chart.aggregate([
     {
@@ -241,14 +243,12 @@ const getYearlyReport = async (req, res) => {
       $group: {
         _id: { month: "$month" },
         income: {
-          $sum: {
-            $cond: [{ $eq: ["$type", "income"] }, "$price", 0],
-          },
+          $sum: { $cond: [{ $eq: ["$type", "income"] }, "$price", 0] },
         },
         savings: {
           $sum: {
             $cond: [
-              { $and: [{ $eq: ["$type", "savings"] }, { $ne: ["$categoryName", "emergency fund"] }] },
+              { $and: [{ $eq: ["$type", "savings"] }, { $ne: ["$category", "emergency fund"] }] },
               "$price",
               0,
             ],
@@ -257,7 +257,7 @@ const getYearlyReport = async (req, res) => {
         emergencyFund: {
           $sum: {
             $cond: [
-              { $and: [{ $eq: ["$type", "savings"] }, { $eq: ["$categoryName", "emergency fund"] }] },
+              { $and: [{ $eq: ["$type", "savings"] }, { $eq: ["$category", "emergency fund"] }] },
               "$price",
               0,
             ],
@@ -266,7 +266,7 @@ const getYearlyReport = async (req, res) => {
         expense: {
           $sum: {
             $cond: [
-              { $and: [{ $eq: ["$type", "expense"] }, { $ne: ["$categoryName", "give loan"] }] },
+              { $and: [{ $eq: ["$type", "expense"] }, { $ne: ["$category", "give loan"] }] },
               "$price",
               0,
             ],
@@ -275,7 +275,7 @@ const getYearlyReport = async (req, res) => {
         loanGiven: {
           $sum: {
             $cond: [
-              { $and: [{ $eq: ["$type", "expense"] }, { $eq: ["$categoryName", "give loan"] }] },
+              { $and: [{ $eq: ["$type", "expense"] }, { $eq: ["$category", "give loan"] }] },
               "$price",
               0,
             ],
@@ -294,32 +294,47 @@ const getYearlyReport = async (req, res) => {
         loanGiven: 1,
       },
     },
-    {
-      $sort: { month: 1 },
-    },
+    { $sort: { month: 1 } },
   ]);
 
-  // Step 2: Format data for all months (fill missing months with 0s)
+  // Step 2: Format data for all months (always 12 entries)
   const months = moment.monthsShort(); // ["Jan", "Feb", ...]
   let openBalance = 0;
 
   const monthlyReport = months.map((m, i) => {
-    const monthData = result.find(r => r.month === i + 1) || {
-      income: 0,
-      savings: 0,
-      emergencyFund: 0,
-      expense: 0,
-      loanGiven: 0,
-    };
+    const monthNum = i + 1;
+
+    // only allow data till current month, else zero
+    const monthData =
+      monthNum <= currentMonth
+        ? result.find(r => r.month === monthNum) || {
+            income: 0,
+            savings: 0,
+            emergencyFund: 0,
+            expense: 0,
+            loanGiven: 0,
+          }
+        : {
+            income: 0,
+            savings: 0,
+            emergencyFund: 0,
+            expense: 0,
+            loanGiven: 0,
+          };
 
     const closingBalance =
-      openBalance +
-      monthData.income -
-      (monthData.savings + monthData.expense + monthData.emergencyFund + monthData.loanGiven);
+      monthNum <= currentMonth
+        ? openBalance +
+          monthData.income -
+          (monthData.savings +
+            monthData.expense +
+            monthData.emergencyFund +
+            monthData.loanGiven)
+        : 0;
 
     const report = {
       month: m,
-      openBalance,
+      openBalance: monthNum <= currentMonth ? openBalance : 0,
       income: monthData.income,
       savings: monthData.savings,
       expense: monthData.expense,
@@ -328,12 +343,17 @@ const getYearlyReport = async (req, res) => {
       closingBalance,
     };
 
-    openBalance = closingBalance; // next month's openBalance
+    // only carry forward balance if this month is before/equal current
+    if (monthNum <= currentMonth) {
+      openBalance = closingBalance;
+    }
+
     return report;
   });
 
   return res.status(200).json({ data: monthlyReport, message: "success" });
 };
+
 
 
 module.exports = { getChartDetails, getOverView , getYearlyReport};
