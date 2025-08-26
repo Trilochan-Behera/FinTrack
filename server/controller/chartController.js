@@ -192,11 +192,13 @@ const getChartDetails = async (req, res) => {
 const getOverView = async (req, res) => {
   let { year } = req.query;
   year = Number(year) || moment().year();
+  month = moment().month() + 1;
   const result = await Chart.aggregate([
     {
       $match: {
         type: { $in: ["income", "savings", "expense"] },
         year: year,
+        month: month,
         user: new ObjectId(req.userId),
       },
     },
@@ -221,4 +223,117 @@ const getOverView = async (req, res) => {
   return res.status(200).json({ data: result, message: "success" });
 };
 
-module.exports = { getChartDetails, getOverView };
+
+const getYearlyReport = async (req, res) => {
+  let { year } = req.query;
+  year = Number(year) || moment().year();
+
+  // Step 1: Fetch all data for that year grouped by month
+  const result = await Chart.aggregate([
+    {
+      $match: {
+        type: { $in: ["income", "savings", "expense"] },
+        year: year,
+        user: new ObjectId(req.userId),
+      },
+    },
+    {
+      $group: {
+        _id: { month: "$month" },
+        income: {
+          $sum: {
+            $cond: [{ $eq: ["$type", "income"] }, "$price", 0],
+          },
+        },
+        savings: {
+          $sum: {
+            $cond: [
+              { $and: [{ $eq: ["$type", "savings"] }, { $ne: ["$categoryName", "emergency fund"] }] },
+              "$price",
+              0,
+            ],
+          },
+        },
+        emergencyFund: {
+          $sum: {
+            $cond: [
+              { $and: [{ $eq: ["$type", "savings"] }, { $eq: ["$categoryName", "emergency fund"] }] },
+              "$price",
+              0,
+            ],
+          },
+        },
+        expense: {
+          $sum: {
+            $cond: [
+              { $and: [{ $eq: ["$type", "expense"] }, { $ne: ["$categoryName", "give loan"] }] },
+              "$price",
+              0,
+            ],
+          },
+        },
+        loanGiven: {
+          $sum: {
+            $cond: [
+              { $and: [{ $eq: ["$type", "expense"] }, { $eq: ["$categoryName", "give loan"] }] },
+              "$price",
+              0,
+            ],
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        month: "$_id.month",
+        income: 1,
+        savings: 1,
+        emergencyFund: 1,
+        expense: 1,
+        loanGiven: 1,
+      },
+    },
+    {
+      $sort: { month: 1 },
+    },
+  ]);
+
+  // Step 2: Format data for all months (fill missing months with 0s)
+  const months = moment.monthsShort(); // ["Jan", "Feb", ...]
+  let openBalance = 0;
+
+  const monthlyReport = months.map((m, i) => {
+    const monthData = result.find(r => r.month === i + 1) || {
+      income: 0,
+      savings: 0,
+      emergencyFund: 0,
+      expense: 0,
+      loanGiven: 0,
+    };
+
+    const closingBalance =
+      openBalance +
+      monthData.income -
+      (monthData.savings + monthData.expense + monthData.emergencyFund + monthData.loanGiven);
+
+    const report = {
+      month: m,
+      openBalance,
+      income: monthData.income,
+      savings: monthData.savings,
+      expense: monthData.expense,
+      emergencyFund: monthData.emergencyFund,
+      loanGiven: monthData.loanGiven,
+      closingBalance,
+    };
+
+    openBalance = closingBalance; // next month's openBalance
+    return report;
+  });
+
+  return res.status(200).json({ data: monthlyReport, message: "success" });
+};
+
+
+module.exports = { getChartDetails, getOverView , getYearlyReport};
