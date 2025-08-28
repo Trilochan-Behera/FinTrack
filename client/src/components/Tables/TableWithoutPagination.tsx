@@ -89,7 +89,7 @@ const TableWithoutPagination = ({
                       "loanGiven",
                       "closingBalance",
                     ].map((data, i) => (
-                      <td className={`border-b w-fit border-[#eee] h-8 py-[11px] dark:border-strokedark ${i>0 ? 'pl-1': 'pl-9'}`}>
+                      <td className={`border-b w-fit border-[#eee] h-8 py-[11px] dark:border-strokedark ${i>0 ? 'pl-1': 'pl-9'}`} key={i}>
                         <h5 className={`font-medium  ${data === 'income' ? `text-[#27C190]` : data === 'savings' || data === 'emergencyFund'? `text-[#22B3FF]`: data === 'expense' || data=== 'loanGiven'? `text-[#e13d69]` : `text-black dark:text-white`}`}>
                           {item[data]}
                         </h5>
