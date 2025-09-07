@@ -1,6 +1,7 @@
 const Chart = require("../schema/detailsSchema");
 const moment = require("moment");
 const mongoose = require("mongoose");
+const financialYearBalanceSchema = require("../schema/financialYearBalanceSchema");
 const { ObjectId } = mongoose.Types; // Import ObjectId directly from mongoose.Types
 
 const getChartDetails = async (req, res) => {
@@ -223,32 +224,49 @@ const getOverView = async (req, res) => {
   return res.status(200).json({ data: result, message: "success" });
 };
 
-
 const getYearlyReport = async (req, res) => {
   let { year } = req.query;
   year = Number(year) || moment().year();
 
-  const currentMonth = moment().month() + 1; // 1–12
+  // FY starts in April of given year → ends in March of next year
+  const fyStartYear = year;
+  const fyEndYear = year + 1;
 
-  // Step 1: Fetch all data for that year grouped by month
+  const prevFY = await financialYearBalanceSchema.findOne({
+    user: new ObjectId(req.userId),
+    financialYearStart: year - 1,
+    financialYearEnd: year,
+  });
+
+  const prevMarchBalance = prevFY ? prevFY.closingBalance : 0;
+
+  // Step 1: Fetch Apr–Mar data for given FY
   const result = await Chart.aggregate([
     {
       $match: {
         type: { $in: ["income", "savings", "expense"] },
-        year: year,
         user: new ObjectId(req.userId),
+        $or: [
+          { year: fyStartYear, month: { $gte: 4 } }, // Apr–Dec of start year
+          { year: fyEndYear, month: { $lte: 3 } }, // Jan–Mar of next year
+        ],
       },
     },
     {
       $group: {
-        _id: { month: "$month" },
+        _id: { year: "$year", month: "$month" },
         income: {
           $sum: { $cond: [{ $eq: ["$type", "income"] }, "$price", 0] },
         },
         savings: {
           $sum: {
             $cond: [
-              { $and: [{ $eq: ["$type", "savings"] }, { $ne: ["$category", "emergency fund"] }] },
+              {
+                $and: [
+                  { $eq: ["$type", "savings"] },
+                  { $ne: ["$category", "emergency fund"] },
+                ],
+              },
               "$price",
               0,
             ],
@@ -257,7 +275,12 @@ const getYearlyReport = async (req, res) => {
         emergencyFund: {
           $sum: {
             $cond: [
-              { $and: [{ $eq: ["$type", "savings"] }, { $eq: ["$category", "emergency fund"] }] },
+              {
+                $and: [
+                  { $eq: ["$type", "savings"] },
+                  { $eq: ["$category", "emergency fund"] },
+                ],
+              },
               "$price",
               0,
             ],
@@ -266,7 +289,12 @@ const getYearlyReport = async (req, res) => {
         expense: {
           $sum: {
             $cond: [
-              { $and: [{ $eq: ["$type", "expense"] }, { $ne: ["$category", "give loan"] }] },
+              {
+                $and: [
+                  { $eq: ["$type", "expense"] },
+                  { $ne: ["$category", "give loan"] },
+                ],
+              },
               "$price",
               0,
             ],
@@ -275,7 +303,12 @@ const getYearlyReport = async (req, res) => {
         loanGiven: {
           $sum: {
             $cond: [
-              { $and: [{ $eq: ["$type", "expense"] }, { $eq: ["$category", "give loan"] }] },
+              {
+                $and: [
+                  { $eq: ["$type", "expense"] },
+                  { $eq: ["$category", "give loan"] },
+                ],
+              },
               "$price",
               0,
             ],
@@ -286,6 +319,7 @@ const getYearlyReport = async (req, res) => {
     {
       $project: {
         _id: 0,
+        year: "$_id.year",
         month: "$_id.month",
         income: 1,
         savings: 1,
@@ -294,59 +328,62 @@ const getYearlyReport = async (req, res) => {
         loanGiven: 1,
       },
     },
-    { $sort: { month: 1 } },
+    { $sort: { year: 1, month: 1 } },
   ]);
 
-  // Step 2: Format data for all months (always 12 entries)
-  const months = moment.monthsShort(); // ["Jan", "Feb", ...]
-  let openBalance = 0;
+  // Step 2: Prepare Apr–Mar sequence
+  const months = Array.from(
+    { length: 12 },
+    (_, i) =>
+      moment()
+        .month((i + 3) % 12)
+        .format("MMM") // 3 = April (0-indexed)
+  );
+
+  // 🚀 initialize with previous March balance
+  let openBalance = prevMarchBalance;
 
   const monthlyReport = months.map((m, i) => {
-    const monthNum = i + 1;
+    const monthNum = (i + 4) % 12 || 12; // Apr=4 … Mar=3
+    const monthYear = monthNum >= 4 ? fyStartYear : fyEndYear;
 
-    // only allow data till current month, else zero
-    const monthData =
-      monthNum <= currentMonth
-        ? result.find(r => r.month === monthNum) || {
-            income: 0,
-            savings: 0,
-            emergencyFund: 0,
-            expense: 0,
-            loanGiven: 0,
-          }
-        : {
-            income: 0,
-            savings: 0,
-            emergencyFund: 0,
-            expense: 0,
-            loanGiven: 0,
-          };
+    const monthData = result.find(
+      (r) => r.year === monthYear && r.month === monthNum
+    ) || {
+      income: 0,
+      savings: 0,
+      emergencyFund: 0,
+      expense: 0,
+      loanGiven: 0,
+    };
 
     const closingBalance =
-      monthNum <= currentMonth
-        ? openBalance +
-          monthData.income -
-          (monthData.savings +
-            monthData.expense +
-            monthData.emergencyFund +
-            monthData.loanGiven)
-        : 0;
+      openBalance +
+      monthData.income -
+      (monthData.savings +
+        monthData.expense +
+        monthData.emergencyFund +
+        monthData.loanGiven);
+
+    const currentYear = moment().year();
+    const currentMonth = moment().month() + 1; // 1–12
 
     const report = {
       month: m,
-      openBalance: monthNum <= currentMonth ? openBalance : 0,
+      openBalance:
+        monthYear === currentYear && monthNum <= currentMonth ? openBalance : 0,
       income: monthData.income,
       savings: monthData.savings,
       expense: monthData.expense,
       emergencyFund: monthData.emergencyFund,
       loanGiven: monthData.loanGiven,
-      closingBalance,
+      closingBalance:
+        monthYear === currentYear && monthNum <= currentMonth
+          ? closingBalance
+          : 0,
     };
 
-    // only carry forward balance if this month is before/equal current
-    if (monthNum <= currentMonth) {
-      openBalance = closingBalance;
-    }
+    openBalance = closingBalance; // carry forward
 
     return report;
   });
@@ -354,6 +391,4 @@ const getYearlyReport = async (req, res) => {
   return res.status(200).json({ data: monthlyReport, message: "success" });
 };
 
-
-
-module.exports = { getChartDetails, getOverView , getYearlyReport};
+module.exports = { getChartDetails, getOverView, getYearlyReport };

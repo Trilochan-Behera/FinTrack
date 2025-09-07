@@ -41,7 +41,7 @@ const TableWithoutPagination = ({
           className={`max-w-full overflow-x-auto min-h-[600px] overflow-auto`}
         >
           <div className="text-sm font-semibold text-black dark:text-white w-full flex justify-betweeen items-center my-4">
-            <h4 className="text-lg sm:text-xl font-medium text-black dark:text-white w-1/2 ml-8">
+            <h4 className="text-lg sm:text-xl font-medium text-black dark:text-white w-full sm:w-1/2 ml-8">
               Yearly Report
             </h4>
             <div className="flex justify-end w-full mr-8">
@@ -63,7 +63,7 @@ const TableWithoutPagination = ({
                 <tr className="bg-primary bg-opacity-20 dark:bg-meta-3">
                   {header.map((h: any, i: any) => (
                     <th
-                      className={`w-[160px] py-3 text-left font-medium text-black dark:text-white ${
+                      className={`min-w-[120px] sm:min-w-[155px] py-3 text-left font-medium text-black dark:text-white ${
                         i == 0 && "pl-9"
                       } `}
                       key={i}
@@ -89,7 +89,7 @@ const TableWithoutPagination = ({
                       "loanGiven",
                       "closingBalance",
                     ].map((data, i) => (
-                      <td className={`border-b w-fit border-[#eee] h-8 py-[11px] dark:border-strokedark ${i>0 ? 'pl-1': 'pl-9'}`} key={i}>
+                      <td className={` border-b w-fit border-[#eee] h-8 py-[11px] dark:border-strokedark ${i>0 ? 'pl-1': 'pl-9'}`} key={i}>
                         <h5 className={`font-medium  ${data === 'income' ? `text-[#27C190]` : data === 'savings' || data === 'emergencyFund'? `text-[#22B3FF]`: data === 'expense' || data=== 'loanGiven'? `text-[#e13d69]` : `text-black dark:text-white`}`}>
                           {item[data]}
                         </h5>
